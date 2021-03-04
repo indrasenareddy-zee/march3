@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize")
 const db = require("../config/db")
  var Photo=require("../models/photo")
+ const Post = require("../models/postModel")
 const User = db.define("users", {
     id: {
         type: Sequelize.STRING,
@@ -22,5 +23,5 @@ const User = db.define("users", {
 
 
 Photo.belongsTo(User)
-
+Post.belongsTo(User)
 module.exports = User

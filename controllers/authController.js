@@ -3,15 +3,25 @@ const { v4: uuidv4 } = require('uuid');
 const { response } = require("express");
 var User = require("../models/users")
 var Photo = require("../models/photo")
+var bcrypt = require("bcrypt")
+var jwt = require("jsonwebtoken")
 exports.signup = async(req,res)=>{
     console.log(req.body)
-    
-    var user ={
-id:uuidv4(),
-username:req.body.username,
-phone:req.body.phone,
-password:req.body.password
+    //check user already exists
+    var user = await User.findOne({
+       where:{ phone:req.body.phone}})
+    console.log(user)
+    if(user){
+        return res.status(409).json({msg:"user already registered"})
     }
+    var password = await bcrypt.hash(req.body.password,10)
+    var user ={
+        id:uuidv4(),
+        username:req.body.username,
+        phone:req.body.phone,
+        password:password
+            }
+            console.log(user)
     await User.create(user).then((response)=>{
         console.log(response)
         return res.status(200).json(response)
@@ -19,6 +29,30 @@ password:req.body.password
         return res.status(500).json(err)
     })
 }
+
+exports.signin = async(req,res)=>{
+ console.log(req.body.phone)
+ var user = await User.findOne({
+     where:{ phone:req.body.phone}})
+ if(!user){
+    return res.status(404).json({msg:"user not found"})
+ }
+ var matchPassword = await bcrypt.compare(req.body.password,user.password)
+ console.log(matchPassword)
+ if(!matchPassword){
+    return res.status(400).json({msg:"invalid credentials"})
+ }
+ var token = await jwt.sign({username:user.username,id:user.id},'jwtsecret',{expiresIn:"1h"})
+await user.update({
+    token :token
+})
+console.log(user)
+ return res.status(200).json(user)
+}
+
+// exports.logout = async(req,res)=>{
+
+// }
 
 exports.deleteUser = async(req,res)=>{
     console.log("in")
