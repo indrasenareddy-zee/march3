@@ -1,11 +1,19 @@
 var db = require("../config/db")
 const { v4: uuidv4 } = require('uuid');
 const { response } = require("express");
+var validation = require("./validationController")
 var User = require("../models/users")
 var Photo = require("../models/photo")
 var bcrypt = require("bcrypt")
+var errors = require("../errorFiles/errorCodes.json")
 var jwt = require("jsonwebtoken")
 exports.signup = async(req,res)=>{
+   console.log("in")
+    var {firstName,lastName,email,phone,password} = req.body
+    if(!firstName || !lastName || !email || !phone || !password){
+        return res.status(400).json(errors.BAD_REQUEST)
+    }
+console.log(validation.emailValidate(email))
     console.log(req.body)
     //check user already exists
     var user = await User.findOne({
@@ -16,8 +24,9 @@ exports.signup = async(req,res)=>{
     }
     var password = await bcrypt.hash(req.body.password,10)
     var user ={
-        id:uuidv4(),
-        username:req.body.username,
+        email:req.body.email,
+        firstName:req.body.firstName,
+        lastName:req.body.lastName,
         phone:req.body.phone,
         password:password
             }
@@ -26,7 +35,7 @@ exports.signup = async(req,res)=>{
         console.log(response)
         return res.status(200).json(response)
     }).catch((err)=>{
-        return res.status(500).json(err)
+        return res.status(406).json({messag:err.errors[0].message})
     })
 }
 

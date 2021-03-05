@@ -64,11 +64,8 @@ if(req.files.photo.length){
     })
   
 }
-var photos = await Photo.findAll({
-    where:{userId:req.user.id,postId:"a4cf2582-c206-4f51-a081-d7be1bfd2dd6"}
-})
-console.log("photsss",photos)
-return res.status(200).json({newPost,photos})
+
+return res.status(200).json({newPost})
 }
 
 exports.getPhotos = async(req,res)=>{

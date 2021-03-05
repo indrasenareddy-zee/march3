@@ -4,7 +4,6 @@ var db=require("../config/db")
 exports.auth = async(req,res,next)=>{
 if(!req.headers.authorization){
     return res.status(409).json({message:"you are not authorized to do this"})
-
 }
 const token = req.headers.authorization.split(' ')[1];
 
